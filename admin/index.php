@@ -44,13 +44,13 @@ incluirTemplates('header');
             <?php while ($fila = mysqli_fetch_assoc($resultadoPropiedad)) : ?>
 
                 <tr>
-                    <td> <?php echo $fila['id'] ?> </td>
-                    <td><?php echo $fila['titulo'] ?></td>
-                    <td> <img src="/imagenes/<?php echo $fila['imagen'] ?>" alt="Imagen" class="imagen-tabla"></td>
-                    <td>$<?php echo $fila['precio'] ?></td>
+                    <td> <?php echo $fila['id']; ?> </td>
+                    <td><?php echo $fila['titulo']; ?></td>
+                    <td> <img src="/imagenes/<?php echo $fila['imagen']; ?>" alt="Imagen" class="imagen-tabla"></td>
+                    <td>$<?php echo $fila['precio']; ?></td>
                     <td>
                         <a href="#" class="boton-rojo-block">Eliminar</a>
-                        <a href="#" class="boton-amarillo-block">Actualizar</a>
+                        <a href="../admin/propiedades/actualizar.php?id=<?php echo $fila['id']; ?>" class="boton-amarillo-block">Actualizar</a>
                     </td>
                 </tr>
 
