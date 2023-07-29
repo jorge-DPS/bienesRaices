@@ -5,7 +5,36 @@
     font-weight: $bold;
     text-transform: uppercase;
     margin: 1rem 0;
-    &.error { //-> cuando se tiene dos clases al mismo nivel se pone un &
+
+    &.error {
+        //-> cuando se tiene dos clases al mismo nivel se pone un &
         background-color: $rojo;
-    }  
+    }
+
+    &.exito {
+        background-color: $verde;
+    }
+}
+
+table.propiedades {
+    text-align: center;
+    margin-top: 4rem;
+    width: 100%;
+    border-spacing: 0;
+
+    thead {
+        background-color: $verde;
+
+        th {
+            color: $blanco;
+        }
+    }
+
+    tbody {
+        color: $negro;
+    }
+
+    .imagen-tabla {
+        width: 10rem;
+    }
 }

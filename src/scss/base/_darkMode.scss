@@ -33,9 +33,10 @@
 
 
     .formulario {
+
         label,
         legend,
-        p{
+        p {
             color: $gris;
         }
 
@@ -45,6 +46,12 @@
             background-color: $grisOscuro;
             color: $blanco;
             border: 1px solid $grisOscuro;
+        }
+    }
+
+    table.propiedades {
+        tbody {
+            color: $blanco;
         }
     }
 

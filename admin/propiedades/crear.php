@@ -52,7 +52,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') { //-> aqui verificamos desde la supe
     //Aasignar files hacia una variable
     $imagen = $_FILES['imagen'];
 
-    var_dump($imagen['name']);
+    echo "<pre>";
+    var_dump($imagen);
+    echo "</pre>";
 
     // exit;
 
@@ -89,9 +91,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') { //-> aqui verificamos desde la supe
         $errores[] = 'La imagen es obligatoria';
     }
 
-    //validar por tamaño (100 kb Mmáximo)
-    $medida = 1000 * 100;
-    if ($imagen['size'] > $medidda) {
+    //validar por tamaño (1mb Mmáximo)
+    $medida = 1000 * 1000;
+    if ($imagen['size'] > $medida) {
         $errores[] = 'La imagen es muy pesada';
     }
 
@@ -103,16 +105,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') { //-> aqui verificamos desde la supe
 
     if (empty($errores)) { //-> si $errores esta vacio entonces inserta los datos
         /** SUBIDA DE ARCHIVOS */
+        //CREAR CARPETA
+        $carpetaImagenes = '../../imagenes/'; //-> salimos hsata la raiz del proyecto ../../
+        if (!is_dir($carpetaImagenes)) { // -> verificamos la carpeta de imagenes
+            mkdir($carpetaImagenes); //-> crea la carpeta
+        }
+
+        // Genera un nombre único para la imagen
+        $extencion = explode('.', $imagen['name']); //-> aqui dividimos la cadena por cada punto encontrado; en este caso para la extencion jpg
+        $nombreImagen = md5(uniqid(rand(), true)) . '.' . $extencion[count($extencion) - 1]; //-> aqui concatenamos la extencion 
+        var_dump($nombreImagen);
+
+        // Subir la imagen
+        move_uploaded_file($imagen['tmp_name'], $carpetaImagenes . $nombreImagen);
+
         /* Begin::insertar en la base de datos */
-        $query = "INSERT INTO propiedades (titulo, precio, descripcion, habitaciones, wc, estacionamiento, creado, vendedores_id )
-        VALUES ( '$titulo', '$precio', '$descripcion', '$habitaciones', '$wc', '$estacionamiento','$creado', '$vendedorId' )";
+        $query = "INSERT INTO propiedades (titulo, precio,imagen, descripcion, habitaciones, wc, estacionamiento, creado, vendedores_id )
+        VALUES ( '$titulo', '$precio', '$nombreImagen', '$descripcion', '$habitaciones', '$wc', '$estacionamiento','$creado', '$vendedorId' )";
 
         // echo $query; -> para probar la consulta
         $resultado = mysqli_query($db, $query);
 
         if ($resultado) {
             // redireccionar al usuario, una vez que el formulario se lleno correctamente
-            header('Location: /admin');
+            header('Location: /admin?resultado=1');
         }
         /* End::insertar en la base de datos */
     }
