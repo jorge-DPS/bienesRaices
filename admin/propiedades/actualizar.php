@@ -6,20 +6,25 @@ $id = filter_var($id, FILTER_VALIDATE_INT);
 if (!$id) {
     header('Location: /admin');
 }
-var_dump($id);
+// var_dump($id);
 /** End::Validar la URL por Id valido */
 
 /* Begin::conectar con la base d e datos */
-// base de datos, aqui lo importamos con require
 require "../../includes/config/database.php";
-// unaves importado la base de datos; usamos diorectamente las funciones ya definidas en database.php
 $db = conectarDB();
 /* End::conectar con la base d e datos */
+
+// obtener los datos de la propiedad
+$consultaPropiedad = "SELECT * FROM propiedades WHERE id = {$id}";
+$resultadoPropiedad = mysqli_query($db, $consultaPropiedad);
+$propiedad = mysqli_fetch_assoc($resultadoPropiedad);
+// echo "<pre>";
+// var_dump($propiedad);
+// echo "</pre>";
 
 /* Begin::Consultar a labase de dataso para obtener los vendedores */
 $consultaVendedores = "SELECT * FROM vendedores";
 $resultVendedores = mysqli_query($db, $consultaVendedores); //-> (conectar con la base de datos, consulta)
-
 /* End::Consultar a labase de dataso para obtener los vendedores */
 
 /* Begin::mensaje de errores */
@@ -28,13 +33,14 @@ $errores = [];
 
 /* Begin::Guardar la info llenada cuando sucede el error */
 /** creamos las variables vacias, son superglobales, por mas que se recarge la pagina POST tiene la infomracion del formulario */
-$precio = '';
-$titulo = '';
-$descripcion = '';
-$habitaciones = '';
-$wc = '';
-$estacionamiento = '';
-$vendedorId = '';
+$titulo = $propiedad['titulo'];
+$precio = $propiedad['precio'];
+$descripcion = $propiedad['descripcion'];
+$habitaciones = $propiedad['habitaciones'];
+$wc = $propiedad['wc'];
+$estacionamiento = $propiedad['estacionamiento'];
+$vendedorId = $propiedad['vendedores_id'];
+$imagenPropiedad = $propiedad['imagen'];
 /* End::Guardar la info llenada cuando sucede el error */
 
 
@@ -44,7 +50,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') { //-> aqui verificamos desde la supe
     // echo "<pre>";
     // var_dump($_POST);
     // echo "</pre>";
-
     // echo "<pre>";
     // var_dump($_FILES);
     // echo "</pre>";
@@ -61,9 +66,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') { //-> aqui verificamos desde la supe
     //Aasignar files hacia una variable
     $imagen = $_FILES['imagen'];
 
-    echo "<pre>";
-    var_dump($imagen);
-    echo "</pre>";
+    // echo "<pre>";
+    // var_dump($imagen);
+    // echo "</pre>";
 
     // exit;
 
@@ -96,48 +101,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') { //-> aqui verificamos desde la supe
         $errores[] = 'Elige un vendedor';
     }
 
-    if (!$imagen['name'] || $imagen['error']) {
-        $errores[] = 'La imagen es obligatoria';
-    }
-
     //validar por tamaño (1mb Mmáximo)
     $medida = 1000 * 1000;
     if ($imagen['size'] > $medida) {
         $errores[] = 'La imagen es muy pesada';
     }
 
-    // echo "<pre>";
-    // var_dump($creado);
-    // echo "</pre>";
-
-    // exit;
-
     if (empty($errores)) { //-> si $errores esta vacio entonces inserta los datos
         /** SUBIDA DE ARCHIVOS */
-        //CREAR CARPETA
         $carpetaImagenes = '../../imagenes/'; //-> salimos hsata la raiz del proyecto ../../
+        //CREAR CARPETA
         if (!is_dir($carpetaImagenes)) { // -> verificamos la carpeta de imagenes
             mkdir($carpetaImagenes); //-> crea la carpeta
         }
 
-        // Genera un nombre único para la imagen
-        $extencion = explode('.', $imagen['name']); //-> aqui dividimos la cadena por cada punto encontrado; en este caso para la extencion jpg
-        $nombreImagen = md5(uniqid(rand(), true)) . '.' . $extencion[count($extencion) - 1]; //-> aqui concatenamos la extencion 
-        var_dump($nombreImagen);
+        $nombreImagen = '';
 
-        // Subir la imagen
-        move_uploaded_file($imagen['tmp_name'], $carpetaImagenes . $nombreImagen);
+
+        if ($imagen['name']) {
+            // echo "si hay una nueva imagen";
+            // Eliminar la imagen previa 
+            unlink($carpetaImagenes . $propiedad['imagen']); //-> unlink; es para borrar archivos del servidor
+            // Genera un nombre único para la imagen
+            $extencion = explode('.', $imagen['name']); //-> aqui dividimos la cadena por cada punto encontrado; en este caso para la extencion jpg
+            $nombreImagen = md5(uniqid(rand(), true)) . '.' . $extencion[count($extencion) - 1]; //-> aqui concatenamos la extencion 
+            // var_dump($nombreImagen);
+
+            // // Subir la imagen
+            move_uploaded_file($imagen['tmp_name'], $carpetaImagenes . $nombreImagen);
+        } else {
+            $nombreImagen = $propiedad['imagen']; //-> aqui se muestra la imagen que no se actualizo;
+        }
+
+
 
         /* Begin::insertar en la base de datos */
-        $query = "INSERT INTO propiedades (titulo, precio,imagen, descripcion, habitaciones, wc, estacionamiento, creado, vendedores_id )
-        VALUES ( '$titulo', '$precio', '$nombreImagen', '$descripcion', '$habitaciones', '$wc', '$estacionamiento','$creado', '$vendedorId' )";
+        $query = " UPDATE propiedades SET titulo = '$titulo', precio = $precio, imagen = '$nombreImagen', descripcion = '$descripcion', habitaciones = $habitaciones, 
+        wc = $wc, estacionamiento = $estacionamiento, vendedores_id = $vendedorId WHERE id = $id";
+
+        // echo $query;
 
         // echo $query; -> para probar la consulta
         $resultado = mysqli_query($db, $query);
 
         if ($resultado) {
             // redireccionar al usuario, una vez que el formulario se lleno correctamente
-            header('Location: /admin?resultado=1');
+            header('Location: /admin?resultado=2');
         }
         /* End::insertar en la base de datos */
     }
@@ -158,7 +167,7 @@ incluirTemplates('header');
         </div>
     <?php endforeach; ?>
 
-    <form class="formulario" method="POST" action="/admin/propiedades/crear.php" enctype="multipart/form-data">
+    <form class="formulario" method="POST" enctype="multipart/form-data">
         <fieldset>
 
             <legend>Información General</legend>
@@ -171,6 +180,8 @@ incluirTemplates('header');
 
             <label for=" imagen">Imagen</label>
             <input type="file" id="imagen" accept="image/jpeg, image/png" name="imagen">
+
+            <img src="/imagenes/<?php echo $imagenPropiedad; ?>" alt="Iamgen propiedad" class="imagen-small">
 
             <label for="descripcion">Descripcion</label>
             <textarea id="descripcion" name="descripcion" type="text"><?php echo $descripcion; ?></textarea>
@@ -201,7 +212,7 @@ incluirTemplates('header');
             </select>
         </fieldset>
 
-        <input type="submit" value="Crear propiedad" class="boton boton-verde">
+        <input type="submit" value="Actualizar propiedad" class="boton boton-verde">
     </form>
 
 </main>
