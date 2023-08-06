@@ -1,3 +1,13 @@
+<?php
+if (!isset($_SESSION)) {
+    session_start();
+}
+
+$auth = $_SESSION['login'] ?? false; //-> en ta caso si no esta autenticado le asugna un false; es com un if
+
+// var_dump($auth);
+?>
+
 <!DOCTYPE html>
 <html lang="es">
 
@@ -28,6 +38,9 @@
                         <a href="anuncios.php">Anuncios</a>
                         <a href="blog.php">Blog</a>
                         <a href="contacto.php">Contacto</a>
+                        <?php if ($auth) : ?>
+                            <a href="cerrar-sesion.php">Cerrar Sesión</a>
+                        <?php endif; ?>
                     </nav>
                 </div>
 

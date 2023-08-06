@@ -1,5 +1,13 @@
 <?php
 
+/** verificar si esta autenticado*/
+require '../../includes/funciones.php';
+$auth = estaAutenticado();
+if ($auth == false) {
+    header('Location: /');
+}
+
+
 /** Begin::Validar la URL por Id valido */
 $id = $_GET['id'];
 $id = filter_var($id, FILTER_VALIDATE_INT);
@@ -153,7 +161,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') { //-> aqui verificamos desde la supe
 }
 
 
-require '../../includes/funciones.php';
 incluirTemplates('header');
 ?>
 

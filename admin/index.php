@@ -1,5 +1,14 @@
 <?php
 
+
+
+require '../includes/funciones.php';
+$auth = estaAutenticado();
+if (!$auth) {
+    // si auth es false entonces redirigomos al usuario
+    header('Location: /');
+}
+
 //Importar la coneccion
 require '../includes/config/database.php';
 $db = conectarDB(); //-> una ves que lo importamos usamos la funcion definida en database.php
@@ -38,7 +47,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Incluye el template del header
-require '../includes/funciones.php';
 incluirTemplates('header');
 ?>
 

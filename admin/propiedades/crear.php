@@ -1,5 +1,12 @@
 <?php
 
+require '../../includes/funciones.php';
+$auth = estaAutenticado();
+
+if (!$auth) {
+    header('Location: /');
+}
+
 /* Begin::conectar con la base d e datos */
 // base de datos, aqui lo importamos con require
 require "../../includes/config/database.php";
@@ -135,7 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') { //-> aqui verificamos desde la supe
 }
 
 
-require '../../includes/funciones.php';
+// require '../../includes/funciones.php';
 incluirTemplates('header');
 ?>
 
